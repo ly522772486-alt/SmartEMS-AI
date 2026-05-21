@@ -145,3 +145,32 @@ print(
         ["time", "price", "power", "revenue"]
     ]
 )
+
+from src.forecast.price_forecast import PriceForecaster
+
+# 移动平均预测
+ts_df = PriceForecaster.moving_average_forecast(
+    ts_df
+)
+
+print()
+print("========== AI价格预测 ==========")
+
+print(
+    ts_df[
+        ["time", "price", "price_ma"]
+    ].head(10)
+)
+
+# 保存预测结果
+ts_df.to_csv(
+    "reports/forecast_result.csv",
+    index=False,
+    encoding="utf-8-sig"
+)
+
+print()
+print("预测结果已保存")
+
+# AI预测图
+Plotter.plot_forecast(ts_df)

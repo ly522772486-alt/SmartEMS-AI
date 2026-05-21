@@ -154,3 +154,49 @@ class Plotter:
         plt.savefig("reports/price_power_curve.png")
 
         plt.show()
+
+    @staticmethod
+    def plot_forecast(df):
+
+        plt.figure(figsize=(14, 5))
+
+        # 原始价格
+        plt.plot(
+            df["time"],
+            df["price"],
+            label="实时电价",
+            color="red"
+        )
+
+        # 移动平均趋势
+        plt.plot(
+            df["time"],
+            df["price_ma"],
+            label="预测趋势",
+            color="blue",
+            linewidth=2
+        )
+
+        plt.title("AI电价趋势预测")
+
+        plt.xlabel("时间")
+
+        plt.ylabel("电价（元/MWh）")
+
+        plt.xticks(
+            ticks=range(0, len(df["time"]), 4),
+            labels=df["time"][::4],
+            rotation=45
+        )
+
+        plt.legend()
+
+        plt.grid(True)
+
+        plt.tight_layout()
+
+        plt.savefig(
+            "reports/forecast_curve.png"
+        )
+
+        plt.show()
