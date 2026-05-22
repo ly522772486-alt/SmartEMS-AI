@@ -1,8 +1,10 @@
+import _bootstrap  # noqa: F401
+
 from sklearn.model_selection import train_test_split
 
 from src.utils.data_loader import DataLoader
 from src.analysis.preprocess import DataPreprocessor
-from src.forecast.feature_engineering import FeatureEngineering
+from src.feature_engineering.feature_pipeline import FeaturePipeline
 from src.forecast.ml_model import MLModel
 
 from sklearn.metrics import (
@@ -44,31 +46,13 @@ df = DataPreprocessor.build_unit_timeseries(
 # 4. 特征工程
 # =========================
 
-df = FeatureEngineering.add_lag_features(df)
-
-df = FeatureEngineering.add_rolling_features(df)
-
-df = FeatureEngineering.add_time_features(df)
-
-# 删除空值
-df = df.dropna()
+X, y, df = FeaturePipeline.split_xy(df)
 
 # =========================
 # 5. 构建 X/y
 # =========================
 
-X = df[
-    [
-        "price_lag_1",
-        "price_lag_2",
-        "price_lag_4",
-        "rolling_mean_4",
-        "rolling_std_4",
-        "hour"
-    ]
-]
-
-y = df["price"]
+print("特征列:", list(X.columns))
 
 # =========================
 # 6. 划分训练测试集

@@ -1,11 +1,4 @@
-import sys
-from pathlib import Path
-
-# 项目根目录
-project_root = Path(__file__).resolve().parents[1]
-
-# 添加到Python路径
-sys.path.append(str(project_root))
+import _bootstrap  # noqa: F401
 
 from src.utils.data_loader import DataLoader
 

@@ -1,3 +1,5 @@
+import _bootstrap  # noqa: F401
+
 from src.utils.data_loader import DataLoader
 from src.analysis.preprocess import DataPreprocessor
 

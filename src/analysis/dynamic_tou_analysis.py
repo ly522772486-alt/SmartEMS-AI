@@ -22,11 +22,13 @@ class DynamicTOUAnalyzer:
     @staticmethod
     def add_dynamic_label(df):
 
-        df["dynamic_period"] = df["price"].apply(
+        result = df.copy()
+
+        result["dynamic_period"] = result["price"].apply(
             DynamicTOUAnalyzer.classify_dynamic_period
         )
 
-        return df
+        return result
 
     @staticmethod
     def summarize_dynamic(df):
