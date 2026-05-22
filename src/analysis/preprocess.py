@@ -17,6 +17,9 @@ class DataPreprocessor:
         # 提取指定机组数据
         unit_df = df[df["名称"] == unit_name]
 
+        if unit_df.empty:
+            raise ValueError(f"未找到机组数据: {unit_name}")
+
         return unit_df
     
     @staticmethod
@@ -34,6 +37,12 @@ class DataPreprocessor:
         price_row = unit_df[
             unit_df["数据类型"] == "出清电价"
         ]
+
+        if power_row.empty:
+            raise ValueError("缺少数据类型: 出清电力")
+
+        if price_row.empty:
+            raise ValueError("缺少数据类型: 出清电价")
 
         # 构建标准表
         result_df = pd.DataFrame({

@@ -26,3 +26,7 @@ class MLModel:
         predictions = model.predict(X_test)
 
         return predictions
+
+
+class LinearRegressionModel(MLModel):
+    """Alias for scripts that expect a model-style class name."""

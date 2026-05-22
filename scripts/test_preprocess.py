@@ -1,8 +1,4 @@
-import sys
-from pathlib import Path
-
-project_root = Path(__file__).resolve().parents[1]
-sys.path.append(str(project_root))
+import _bootstrap  # noqa: F401
 
 from src.utils.data_loader import DataLoader
 from src.analysis.preprocess import DataPreprocessor

@@ -1,3 +1,5 @@
+import _bootstrap  # noqa: F401
+
 from sklearn.model_selection import train_test_split
 
 from sklearn.metrics import (
@@ -10,9 +12,7 @@ import numpy as np
 from src.utils.data_loader import DataLoader
 from src.analysis.preprocess import DataPreprocessor
 
-from src.feature_engineering.feature_engineering import (
-    FeatureEngineering
-)
+from src.feature_engineering.feature_pipeline import FeaturePipeline
 
 from src.models.tree.randomforest import (
     RandomForestModel
@@ -50,35 +50,17 @@ df = DataPreprocessor.build_unit_timeseries(
 # 4. 特征工程
 # =====================================
 
-df = FeatureEngineering.add_lag_features(df)
-
-df = FeatureEngineering.add_rolling_features(df)
-
-df = FeatureEngineering.add_time_features(df)
-
-# 删除空值
-df = df.dropna()
+X, y, df = FeaturePipeline.split_xy(df)
 
 # =====================================
 # 5. 构建特征 X
 # =====================================
 
-X = df[
-    [
-        "price_lag_1",
-        "price_lag_2",
-        "price_lag_4",
-        "rolling_mean_4",
-        "rolling_std_4",
-        "hour"
-    ]
-]
+print("特征列:", list(X.columns))
 
 # =====================================
 # 6. 构建目标 y
 # =====================================
-
-y = df["price"]
 
 # =====================================
 # 7. 划分训练集测试集
@@ -156,7 +138,7 @@ print(
 # 12. 特征重要性
 # =====================================
 
-importance_df = FeatureEngineering.get_feature_importance(
+importance_df = FeaturePipeline.get_feature_importance(
     model,
     X.columns
 )
