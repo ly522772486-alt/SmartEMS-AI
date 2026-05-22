@@ -1,40 +1,64 @@
-import numpy as np
+import pandas as pd
 
 from src.forecast.metrics import ForecastMetrics
 
 
-# 真实值
-y_true = np.array([
-    390,
-    385,
-    400,
-    420,
-    450
-])
+# ======================
+# 1. 读取预测结果
+# ======================
 
-# 预测值
-y_pred = np.array([
-    392,
-    380,
-    410,
-    415,
-    440
-])
+df = pd.read_csv(
+    "reports/forecast_result.csv"
+)
 
 
-# 计算MAE
+# ======================
+# 2. 删除空值
+# ======================
+
+df = df.dropna()
+
+
+# ======================
+# 3. 真实值
+# ======================
+
+y_true = df["price"].values
+
+
+# ======================
+# 4. 预测值
+# ======================
+
+y_pred = df["price_ma"].values
+
+
+# ======================
+# 5. MAE
+# ======================
+
 mae = ForecastMetrics.mae(
     y_true,
     y_pred
 )
 
-# 计算RMSE
+
+# ======================
+# 6. RMSE
+# ======================
+
 rmse = ForecastMetrics.rmse(
     y_true,
     y_pred
 )
 
 
-print("MAE:", mae)
+# ======================
+# 7. 输出结果
+# ======================
 
-print("RMSE:", rmse)
+print("\n========== 模型评估 ==========")
+
+print("MAE:", round(mae, 2))
+
+print("RMSE:", round(rmse, 2))
