@@ -46,4 +46,14 @@ class DataPreprocessor:
 
         })
 
+        result_df["power"] = pd.to_numeric(
+        result_df["power"],
+        errors="coerce"
+           )
+
+        result_df["price"] = pd.to_numeric(
+        result_df["price"],
+         errors="coerce"
+            )
+
         return result_df

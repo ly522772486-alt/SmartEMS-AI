@@ -8,7 +8,7 @@ from sklearn.metrics import (
 import numpy as np
 
 from src.utils.data_loader import DataLoader
-from src.analysis.preprocess import DataPreprocessor
+from src.dataset.preprocess import DataPreprocessor
 
 from src.feature_engineering.feature_engineering import (
     FeatureEngineering

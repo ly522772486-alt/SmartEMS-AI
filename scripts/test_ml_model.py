@@ -1,8 +1,8 @@
 from sklearn.model_selection import train_test_split
 
 from src.utils.data_loader import DataLoader
-from src.analysis.preprocess import DataPreprocessor
-from src.forecast.feature_engineering import FeatureEngineering
+from src.dataset.preprocess import DataPreprocessor
+from src.feature_engineering.feature_engineering import FeatureEngineering
 from src.forecast.ml_model import MLModel
 
 from sklearn.metrics import (
@@ -54,7 +54,7 @@ df = FeatureEngineering.add_time_features(df)
 df = df.dropna()
 
 # =========================
-# 5. 构建 X/y
+# 5. 构建 X/y    X是什么？AI输入，即：AI看到的市场信息；本质是告诉AI当前市场是什么状态。 y是什么？真实市场答案；即：真正市场价格
 # =========================
 
 X = df[

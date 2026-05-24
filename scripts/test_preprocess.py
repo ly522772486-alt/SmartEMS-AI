@@ -5,7 +5,7 @@ project_root = Path(__file__).resolve().parents[1]
 sys.path.append(str(project_root))
 
 from src.utils.data_loader import DataLoader
-from src.analysis.preprocess import DataPreprocessor
+from src.dataset.preprocess import DataPreprocessor
 
 
 loader = DataLoader()

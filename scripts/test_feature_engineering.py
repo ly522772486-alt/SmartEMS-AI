@@ -1,61 +1,65 @@
-from src.utils.data_loader import DataLoader
-from src.analysis.preprocess import DataPreprocessor
+import pandas as pd
 
 from src.feature_engineering.feature_engineering import (
     FeatureEngineering
 )
 
+# =====================================
+# 读取数据
+# =====================================
 
-# ======================
-# 1. 读取数据
-# ======================
+df = pd.read_csv(
 
-loader = DataLoader()
+    "data/processed/merged_dataset.csv",
 
-raw_df = loader.load_excel(
-    "01日偏差分析.xlsx"
+    index_col="datetime",
+
+    parse_dates=True
 )
 
+# =====================================
+# 构建Feature
+# =====================================
 
-# ======================
-# 2. 提取机组数据
-# ======================
-
-unit_df = DataPreprocessor.extract_unit_data(
-    raw_df,
-    "华北.昱光/20kV.3#机组"   # 改成真实机组名
+df = (
+    FeatureEngineering
+    .build_features(df)
 )
 
-
-# ======================
-# 3. 构建时间序列
-# ======================
-
-df = DataPreprocessor.build_unit_timeseries(
-    unit_df
-)
-
-
-# ======================
-# 4. 构建特征
-# ======================
-
-df = FeatureEngineering.add_lag_features(df)
-
-df = FeatureEngineering.add_rolling_features(df)
-
-df = FeatureEngineering.add_time_features(df)
-
-
-# ======================
-# 5. 删除空值
-# ======================
+# =====================================
+# 删除NaN
+# =====================================
 
 df = df.dropna()
 
+# =====================================
+# 查看结果
+# =====================================
 
-# ======================
-# 6. 查看结果
-# ======================
+print(df)
 
-print(df.head())
+print("\n数据维度:")
+print(df.shape)
+
+print("\n字段列表:")
+print(df.columns.tolist())
+
+# =====================================
+# 保存Feature数据集
+# =====================================
+
+save_path = (
+    "data/processed/"
+    "feature_dataset.csv"
+)
+
+df.to_csv(
+
+    save_path,
+
+    encoding="utf-8-sig"
+)
+
+print("\nFeature数据集已保存:")
+
+print(save_path)

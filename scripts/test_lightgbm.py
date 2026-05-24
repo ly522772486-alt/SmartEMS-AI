@@ -1,171 +1,198 @@
-from sklearn.model_selection import train_test_split
+import pandas as pd
+import joblib
+
+from pathlib import Path
+
+from sklearn.model_selection import (
+    train_test_split
+)
 
 from sklearn.metrics import (
     mean_absolute_error,
     mean_squared_error
 )
 
-import numpy as np
-
-from src.utils.data_loader import DataLoader
-from src.analysis.preprocess import DataPreprocessor
-
-from src.feature_engineering.feature_engineering import (
-    FeatureEngineering
-)
-
 from src.models.tree.lightgbm import (
     LightGBMModel
 )
 
-
 # =====================================
-# 1. 读取数据
+# 读取数据
 # =====================================
 
-loader = DataLoader()
+df = pd.read_csv(
 
-raw_df = loader.load_excel(
-    "01日偏差分析.xlsx"
+    "data/processed/feature_dataset.csv",
+
+    index_col="datetime",
+
+    parse_dates=True
 )
 
 # =====================================
-# 2. 提取机组数据
+# 构建Target
 # =====================================
 
-unit_df = DataPreprocessor.extract_unit_data(
-    raw_df,
-    "华北.昱光/20kV.3#机组"
+df["target_price"] = (
+    df["price"].shift(-1)
 )
 
-# =====================================
-# 3. 构建时间序列
-# =====================================
-
-df = DataPreprocessor.build_unit_timeseries(
-    unit_df
-)
-
-# =====================================
-# 4. 特征工程
-# =====================================
-
-df = FeatureEngineering.add_lag_features(df)
-
-df = FeatureEngineering.add_rolling_features(df)
-
-df = FeatureEngineering.add_time_features(df)
-
-# 删除空值
 df = df.dropna()
 
 # =====================================
-# 5. 构建特征 X
+# 特征列
 # =====================================
 
-X = df[
-    [
-        "price_lag_1",
-        "price_lag_2",
-        "price_lag_4",
-        "rolling_mean_4",
-        "rolling_std_4",
-        "hour"
-    ]
+feature_columns = [
+
+    "price_lag_1",
+    "price_lag_4",
+    "price_lag_96",
+
+    "power_lag_1",
+
+    "revenue_lag_1",
+
+    "price_rolling_mean_4",
+    "price_rolling_std_4",
+
+    "price_diff_1",
+
+    "hour",
+    "weekday"
 ]
 
 # =====================================
-# 6. 构建目标 y
+# X / y
 # =====================================
 
-y = df["price"]
+X = df[feature_columns]
 
-# 转化数值类型
-X = X.astype(float)
-
-y = y.astype(float)
+y = df["target_price"]
 
 # =====================================
-# 7. 划分训练集测试集
+# 划分数据集
 # =====================================
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X,
-    y,
-    test_size=0.2,
-    shuffle=False
-)
+X_train, X_test, y_train, y_test = (
 
-# =====================================
-# 8. 训练 RandomForest
-# =====================================
+    train_test_split(
 
-model = LightGBMModel.train(
-    X_train,
-    y_train
-)
+        X,
+        y,
 
-# =====================================
-# 9. 模型预测
-# =====================================
+        test_size=0.2,
 
-predictions = LightGBMModel.predict(
-    model,
-    X_test
-)
-
-# =====================================
-# 10. 模型评估
-# =====================================
-
-mae = mean_absolute_error(
-    y_test,
-    predictions
-)
-
-rmse = np.sqrt(
-    mean_squared_error(
-        y_test,
-        predictions
+        shuffle=False
     )
 )
 
-print("\n========== RandomForest模型评估 ==========")
+# =====================================
+# 构建模型
+# =====================================
+
+model = (
+    LightGBMModel
+    .build_model()
+)
+
+# =====================================
+# 模型训练
+# =====================================
+
+print("开始训练 LightGBM...")
+
+model.fit(
+
+    X_train,
+
+    y_train
+)
+
+print("训练完成")
+
+# =====================================
+# 模型预测
+# =====================================
+
+pred = model.predict(X_test)
+
+# =====================================
+# 模型评估
+# =====================================
+
+mae = mean_absolute_error(
+
+    y_test,
+
+    pred
+)
+
+rmse = (
+    mean_squared_error(
+        y_test,
+        pred
+    ) ** 0.5
+)
+
+print("\n========== LightGBM模型评估 ==========")
 
 print(f"MAE: {mae:.2f}")
 
 print(f"RMSE: {rmse:.2f}")
 
 # =====================================
-# 11. 查看预测结果
+# 保存模型
 # =====================================
 
-result_df = X_test.copy()
+Path("models").mkdir(
 
-result_df["real_price"] = y_test.values
-
-result_df["pred_price"] = predictions
-
-print("\n========== 预测结果 ==========")
-
-print(
-    result_df[
-        [
-            "real_price",
-            "pred_price"
-        ]
-    ].head(10)
+    exist_ok=True
 )
 
-# =====================================
-# 12. 特征重要性
-# =====================================
+model_path = (
+    "models/lightgbm.pkl"
+)
 
-importance_df = FeatureEngineering.get_feature_importance(
+joblib.dump(
+
     model,
-    X.columns
+
+    model_path
 )
 
-print("\n========== 特征重要性 ==========")
+print("\n模型已保存:")
 
-print(importance_df)
+print(model_path)
+
+# =====================================
+# 保存预测结果
+# =====================================
+
+Path("output").mkdir(
+
+    exist_ok=True
+)
+
+result_df = pd.DataFrame({
+
+    "real_price": y_test,
+
+    "pred_price": pred
+
+}, index=y_test.index)
+
+result_path = (
+    "data/output/lightgbm_prediction_result.csv"
+)
+
+result_df.to_csv(
+
+    result_path,
+
+    encoding="utf-8-sig"
+)
+
+print("\n预测结果已保存:")
+
+print(result_path)

@@ -1,5 +1,5 @@
 from src.utils.data_loader import DataLoader
-from src.analysis.preprocess import DataPreprocessor
+from src.dataset.preprocess import DataPreprocessor
 
 from src.forecast.train_test_split import TimeSeriesSplit
 
